@@ -1,0 +1,49 @@
+[project]
+name = "hawat"
+version = "0.1.0"
+description = "Conversational agent with long and short-term memory, run only on personal infrastructure, to provide effective advice and assistance to the user."
+authors = [
+    {name = "David Lachut",email = "dslachut@gmail.com"}
+]
+license = {text = "BSD"}
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "grpcio (>=1.71.0,<2.0.0)",
+    "duckdb (>=1.2.2,<2.0.0)",
+    "openai (>=1.72.0,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+#[tool.poetry.group.dev]
+#optional = true
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.5"
+black = "^25.1.0"
+mypy = "^1.15.0"
+pylint = "^3.3.6"
+isort = {extras = ["black"], version = "^6.0.1"}
+ipykernel = "^6.29.5"
+coverage = "^7.8.0"
+grpcio-tools = "^1.71.0"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.pylint]
+ignore = "proto"
+
+[tool.pylint.'MESSAGES CONTROL']
+max-line-length = 120
+disable = """
+    missing-module-docstring
+"""
