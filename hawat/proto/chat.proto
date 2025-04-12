@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// Message from client
+message ClientChat {
+    string message = 1;
+}
+
+// Message from server
+message ServerChat {
+    string message = 1;
+}
+
+// Communicate between the client and the server
+service HawatChat {
+
+    // Send a chat message from the client to the server.
+    rpc send_chat (ClientChat) returns (ServerChat) {};
+}
