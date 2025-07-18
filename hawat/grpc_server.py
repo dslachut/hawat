@@ -25,6 +25,5 @@ class ChatServer(pb2_grpc.HawatChatServicer): # pylint: disable=too-few-public-m
         Returns:
             ServerChat: server's response to chat message
         """
-        print(request.message)
-        response = request.message + " (response)"
-        return pb2.ServerChat(message=response) # pylint: disable=no-member
+        response_message = dispatcher.process_message(request.message)
+        return pb2.ServerChat(message=response_message) # pylint: disable=no-member
