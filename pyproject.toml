@@ -32,6 +32,10 @@ ipykernel = "^6.29.5"
 coverage = "^7.8.0"
 grpcio-tools = "^1.71.0"
 
+[tool.poetry.scripts]
+hawat = "hawat.bin.hawat:main"
+hawat_fe = "hawat.bin.hawat_fe:main"
+
 [tool.black]
 line-length = 120
 
