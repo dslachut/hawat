@@ -7,12 +7,14 @@ Hawat
 Plan Outline
 ---
 - Python CLI FE (initial)
-    - Or Golang for fun?
+    - ~~Or Golang for fun?~~
     - Would need to replace with gui at some point
 - Python BE Controller
-    - gRPC
-        - Receive messages from FE
-        - Pass responses back to FE
+    - [x] gRPC
+        - [x] Receive messages from FE
+        - [x] Pass responses back to FE
+        - [ ] Make it async
+        - [ ] Use a stream?
     - Store conversations
     - Process Messages
         - Summarize conversations
@@ -44,3 +46,10 @@ Plan Outline
         - Write and execute code for technical answers
         - Weather
         - Web search
+
+FYI
+---
+To regenerate the `.py` files in `hawat.proto`, go to the repo root and execute:
+```
+poetry run python -m grpc_tools.protoc -I. --python_out=. --grpc_python_out=. hawat/proto/chat.proto
+```

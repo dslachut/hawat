@@ -1,0 +1,22 @@
+ARG POSTGRES=16
+ARG POSTGIS=3
+ARG PGVECTOR=0.8.0
+FROM docker.io/library/postgres:${POSTGRES}-bookworm
+
+ARG POSTGRES=16
+ARG POSTGIS=3
+
+RUN apt update \
+    && apt -y upgrade \
+    && apt -y full-upgrade \
+    && apt -y install \
+        ca-certificates \
+        postgresql-common
+RUN /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y \
+    && apt -y install \
+        postgresql-${POSTGRES}-postgis-${POSTGIS} \
+        postgresql-${POSTGRES}-postgis-${POSTGIS}-scripts \
+        postgresql-16-pgvector \
+    && apt-get -y autoremove \
+    && apt-get -y autoclean \
+    && rm -rf /var/lib/apt/lists/*

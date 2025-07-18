@@ -4,6 +4,7 @@ import grpc
 
 import hawat.proto.chat_pb2 as pb2
 import hawat.proto.chat_pb2_grpc as pb2_grpc
+import hawat.dispatcher as dispatcher
 
 
 def serve():
@@ -24,4 +25,5 @@ class ChatServer(pb2_grpc.HawatChatServicer): # pylint: disable=too-few-public-m
         Returns:
             ServerChat: server's response to chat message
         """
+        
         return pb2.ServerChat(message=request.message) # pylint: disable=no-member
