@@ -2,9 +2,9 @@ from concurrent.futures import ThreadPoolExecutor
 
 import grpc
 
+import hawat.dispatcher as dispatcher
 import hawat.proto.chat_pb2 as pb2
 import hawat.proto.chat_pb2_grpc as pb2_grpc
-import hawat.dispatcher as dispatcher
 
 
 def serve():
@@ -16,7 +16,7 @@ def serve():
     server.wait_for_termination()
 
 
-class ChatServer(pb2_grpc.HawatChatServicer): # pylint: disable=too-few-public-methods
+class ChatServer(pb2_grpc.HawatChatServicer):  # pylint: disable=too-few-public-methods
     """gRPC service for Hawat chats"""
 
     def send_chat(self, request, context):
@@ -26,4 +26,4 @@ class ChatServer(pb2_grpc.HawatChatServicer): # pylint: disable=too-few-public-m
             ServerChat: server's response to chat message
         """
         response_message = dispatcher.process_message(request.message)
-        return pb2.ServerChat(message=response_message) # pylint: disable=no-member
+        return pb2.ServerChat(message=response_message)  # pylint: disable=no-member
