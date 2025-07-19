@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import psycopg
 from pgvector.psycopg import register_vector
-from hawat.language import get_embedding
+from hawat.embeddings import get_embedding
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
 DB_NAME = os.getenv("DB_NAME", "hawat")

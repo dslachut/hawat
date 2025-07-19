@@ -1,5 +1,5 @@
 import hawat.memory as memory
-from hawat.language import get_embedding
+from hawat.embeddings import get_embedding
 
 
 def process_message(message):
