@@ -1,6 +1,8 @@
 import os
 
 import psycopg
+from pgvector.psycopg import register_vector
+import numpy as np
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
 DB_NAME = os.getenv("DB_NAME", "hawat")
@@ -14,6 +16,7 @@ def _get_db_connection():
     """Establishes and returns a database connection."""
     try:
         conn = psycopg.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
+        register_vector(conn)
         return conn
     except Exception as e:
         print(f"Error connecting to database: {e}")
@@ -29,6 +32,7 @@ def _create_messages_table(conn):
                 CREATE TABLE IF NOT EXISTS messages (
                     id SERIAL PRIMARY KEY,
                     content TEXT NOT NULL,
+                    embedding VECTOR(1536),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """
@@ -38,18 +42,18 @@ def _create_messages_table(conn):
         print(f"Error creating messages table: {e}")
 
 
-def record_user_message(message: str):
+def record_user_message(message: str, embedding: list[float]):
     """Records a user message to the PostgreSQL database."""
-    print(f"Attempting to record message: {message}")
+
     conn = None  # Initialize conn to None
     try:
         conn = _get_db_connection()
         if conn:
             _create_messages_table(conn)
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO messages (content) VALUES (%s)", (message,))
+                cur.execute("INSERT INTO messages (content, embedding) VALUES (%s, %s)", (message, np.array(embedding)))
             conn.commit()
-            print(f"Successfully recorded message: {message}")
+            print(f"Successfully recorded message with embedding: {message}")
     except Exception as e:
         print(f"Error recording message to database: {e}")
     finally:
