@@ -1,9 +1,12 @@
 import os
 
+SYSTEM_PROMPT_TEMPLATE = "You are Hawat, a helpful, conversational AI. Your purpose is to assist the user by providing effective advice and assistance."
+USER_PROMPT_TEMPLATE = "User: {user_message}"
+
 from openai import OpenAI
 
 
-def get_chat_completion(system_prompt: str, user_prompt: str) -> str:
+def get_chat_completion(user_message: str) -> str:
     """
     Gets a chat completion from an OpenAI-compatible API.
 
@@ -21,8 +24,8 @@ def get_chat_completion(system_prompt: str, user_prompt: str) -> str:
     response = client.chat.completions.create(
         model=os.getenv("OPENAI_CHAT_MODEL", "deepseek/deepseek-r1-0528:free"),  # Default chat model
         messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
+            {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE},
+            {"role": "user", "content": USER_PROMPT_TEMPLATE.format(user_message=user_message)},
         ],
     )
     return response.choices[0].message.content
