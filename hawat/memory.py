@@ -1,11 +1,13 @@
+import os
+
 import psycopg
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
-DB_NAME = "hawat"
-DB_USER = "hawat"
-DB_PASSWORD = "123456abcdef"
-DB_HOST = "localhost"
-DB_PORT = "5431"
+DB_NAME = os.getenv("DB_NAME", "hawat")
+DB_USER = os.getenv("DB_USER", "hawat")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "123456abcdef")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5431")
 
 
 def _get_db_connection():
