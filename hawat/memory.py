@@ -27,12 +27,14 @@ def _create_messages_table(conn):
     """Creates the messages table if it doesn\'t exist."""
     try:
         with conn.cursor() as cur:
+            cur.execute("""CREATE EXTENSION IF NOT EXISTS vector;""")
+            conn.commit()
             cur.execute(
                 """
                 CREATE TABLE IF NOT EXISTS messages (
                     id SERIAL PRIMARY KEY,
                     content TEXT NOT NULL,
-                    embedding VECTOR(1536),
+                    embedding VECTOR(384),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """
