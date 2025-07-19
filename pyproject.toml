@@ -7,7 +7,7 @@ authors = [
 ]
 license = {text = "BSD"}
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<4.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -18,9 +18,12 @@ grpcio = "^1.71.0"
 duckdb = "^1.2.2"
 openai = "^1.72.0"
 psycopg = {extras = ["binary", "pool"], version = "^3.2.9"}
+langchain = {extras = ["huggingface", "postgres", "pymupdf4llm"], version = "^0.3.26"}
+pgvector = "^0.4.1"
+sentence-transformers = "^5.0.0"
 
-#[tool.poetry.group.dev]
-#optional = true
+[tool.poetry.group.dev]
+optional = false
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
