@@ -1,8 +1,8 @@
 import os
 
+import numpy as np
 import psycopg
 from pgvector.psycopg import register_vector
-import numpy as np
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
 DB_NAME = os.getenv("DB_NAME", "hawat")
