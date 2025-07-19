@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import numpy as np
 import psycopg
 from pgvector.psycopg import register_vector
+
 from hawat.embeddings import get_embedding
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
@@ -65,7 +66,8 @@ def record_user_message(message: str):
         if conn:
             conn.close()
 
-CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5")) # Default to last 5 minutes
+
+CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))  # Default to last 5 minutes
 
 
 def get_immediate_conversational_context() -> list[str]:
@@ -77,7 +79,9 @@ def get_immediate_conversational_context() -> list[str]:
         if conn:
             with conn.cursor() as cur:
                 time_threshold = datetime.now() - timedelta(minutes=CONTEXT_TIME_WINDOW_MINUTES)
-                cur.execute("SELECT content FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC", (time_threshold,))
+                cur.execute(
+                    "SELECT content FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC", (time_threshold,)
+                )
                 messages = [row[0] for row in cur.fetchall()]
     except Exception as e:
         print(f"Error retrieving conversational context: {e}")
@@ -86,7 +90,9 @@ def get_immediate_conversational_context() -> list[str]:
             conn.close()
     return messages
 
+
 TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
+
 
 def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
     """Retrieves messages most relevant to the query string using vector similarity."""
@@ -97,7 +103,10 @@ def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
         if conn:
             query_embedding = get_embedding(query_string)
             with conn.cursor() as cur:
-                cur.execute("SELECT content FROM messages ORDER BY embedding <-> %s LIMIT %s", (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES))
+                cur.execute(
+                    "SELECT content FROM messages ORDER BY embedding <-> %s LIMIT %s",
+                    (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
+                )
                 messages = [row[0] for row in cur.fetchall()]
     except Exception as e:
         print(f"Error retrieving relevant messages by vector similarity: {e}")

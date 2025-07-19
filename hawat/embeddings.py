@@ -2,6 +2,7 @@ import os
 
 from langchain_huggingface import HuggingFaceEmbeddings
 
+
 def get_embedding(text: str) -> list[float]:
     """
     Generates a vector embedding for the given text using a local HuggingFace Sentence Transformer.
