@@ -77,22 +77,25 @@ CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))
 def get_immediate_conversational_context() -> list[str]:
     """Retrieves the most recent conversational context from the database within a specified time window."""
     conn = None
-    messages = []
+    # Default to an empty list of messages if no connection can be established or an error occurs
+    conn = None  # Initialize conn outside the try block in case of connection errors
+    messages = []  # Default to an empty list of messages
     try:
         conn = _get_db_connection()
         if conn:
             with conn.cursor() as cur:
                 time_threshold = datetime.now() - timedelta(minutes=CONTEXT_TIME_WINDOW_MINUTES)
                 cur.execute(
-                    "SELECT sender, content, timestamp FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC",
+                    "SELECT id, sender, content, timestamp FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC",
                     (time_threshold,),
                 )
                 current_time = datetime.now()
                 messages = [
-                    (row[0], row[1], int((current_time - row[2]).total_seconds() / 60)) for row in cur.fetchall()
+                    (row[0], row[1], row[2], row[3], int((current_time - row[3]).total_seconds() / 60))
+                    for row in cur.fetchall()
                 ]
     except Exception as e:
-        print(f"Error retrieving conversational context: {e}")
+        print(f"Error retrieving immediate conversational context: {e}")
     finally:
         if conn:
             conn.close()
@@ -105,23 +108,33 @@ TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
 def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
     """Retrieves messages most relevant to the query string using vector similarity."""
     conn = None
+    # Default to an empty list of messages if no connection can be established or an error occurs
     messages = []
+    conn = None  # Initialize conn outside the try block
     try:
+        # Attempt to establish a database connection
         conn = _get_db_connection()
         if conn:
+            # Generate an embedding for the query string
             query_embedding = get_embedding(query_string)
             with conn.cursor() as cur:
+                # Execute the SQL query to select messages most similar to the query embedding
                 cur.execute(
-                    "SELECT sender, content, timestamp FROM messages ORDER BY embedding <-> %s LIMIT %s",
+                    "SELECT id, sender, content, timestamp FROM messages ORDER BY embedding <-> %s LIMIT %s",
                     (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
                 )
-                current_time = datetime.now()
+                current_time = datetime.now()  # Get the current time for calculating "minutes ago"
+                # Format the fetched rows into a list of tuples, including a calculated "minutes ago" field
                 messages = [
-                    (row[0], row[1], int((current_time - row[2]).total_seconds() / 60)) for row in cur.fetchall()
+                    (row[0], row[1], row[2], row[3], int((current_time - row[3]).total_seconds() / 60))
+                    for row in cur.fetchall()
                 ]
+    # Catch any exceptions that occur during the database operation
     except Exception as e:
-        print(f"Error retrieving relevant messages by vector similarity: {e}")
+        print(f"Error retrieving relevant messages by vector similarity: {e}")  # Log the error
     finally:
+        # Ensure the database connection is closed, if it was opened
         if conn:
             conn.close()
+    # Return the list of formatted messages (or an empty list if an error occurred)
     return messages
