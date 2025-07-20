@@ -15,7 +15,9 @@ Plan Outline
         - [x] Pass responses back to FE
         - [ ] Make it async
         - [ ] Use a stream?
-    - Store conversations
+    - [ ] Store conversations
+        - [x] Store outgoing messages
+        - [x] Store incoming messages
     - Process Messages
         - Summarize conversations
         - Summarize statements
