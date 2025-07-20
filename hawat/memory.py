@@ -36,6 +36,7 @@ def _create_messages_table(conn):
                 """
                 CREATE TABLE IF NOT EXISTS messages (
                     id SERIAL PRIMARY KEY,
+                    sender TEXT NOT NULL,
                     content TEXT NOT NULL,
                     embedding VECTOR(384),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -57,7 +58,10 @@ def record_user_message(message: str):
             _create_messages_table(conn)
             with conn.cursor() as cur:
                 embedding = get_embedding(message)
-                cur.execute("INSERT INTO messages (content, embedding) VALUES (%s, %s)", (message, np.array(embedding)))
+                cur.execute(
+                    """INSERT INTO messages (sender, content, embedding) VALUES ("user", %s, %s)""",
+                    (message, np.array(embedding)),
+                )
             conn.commit()
             print(f"Successfully recorded message with embedding: {message}")
     except Exception as e:
