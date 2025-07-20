@@ -4,7 +4,7 @@ import hawat.memory as memory
 
 def process_message(message):
     # Call the new memory function to record the message
-    memory.record_user_message(message)
+    memory.record_message(message, sender="user")
     context = _get_formatted_context(message)
     response = language.get_chat_completion(message, context)
     return response

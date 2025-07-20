@@ -48,7 +48,7 @@ def _create_messages_table(conn):
         print(f"Error creating messages table: {e}")
 
 
-def record_user_message(message: str):
+def record_message(message: str, sender: str = "user"):
     """Records a user message to the PostgreSQL database."""
 
     conn = None  # Initialize conn to None
@@ -59,8 +59,8 @@ def record_user_message(message: str):
             with conn.cursor() as cur:
                 embedding = get_embedding(message)
                 cur.execute(
-                    """INSERT INTO messages (sender, content, embedding) VALUES ('user', %s, %s)""",
-                    (message, np.array(embedding)),
+                    """INSERT INTO messages (sender, content, embedding) VALUES (%s, %s, %s)""",
+                    (sender, message, np.array(embedding)),
                 )
             conn.commit()
             print(f"Successfully recorded message with embedding: {message}")
