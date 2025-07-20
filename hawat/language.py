@@ -1,8 +1,8 @@
 import os
 
-SYSTEM_PROMPT_TEMPLATE = "You are Hawat, a helpful, conversational AI. Your purpose is to assist the user by providing effective advice and assistance.
+SYSTEM_PROMPT_TEMPLATE = """You are Hawat, a helpful, conversational AI. Your purpose is to assist the user by providing effective advice and assistance.
 
-{context}"
+{context}"""
 USER_PROMPT_TEMPLATE = "User: {user_message}"
 
 from openai import OpenAI
