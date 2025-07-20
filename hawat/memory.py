@@ -59,7 +59,7 @@ def record_user_message(message: str):
             with conn.cursor() as cur:
                 embedding = get_embedding(message)
                 cur.execute(
-                    """INSERT INTO messages (sender, content, embedding) VALUES ("user", %s, %s)""",
+                    """INSERT INTO messages (sender, content, embedding) VALUES ('user', %s, %s)""",
                     (message, np.array(embedding)),
                 )
             conn.commit()
