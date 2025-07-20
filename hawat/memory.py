@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 import psycopg
@@ -104,14 +104,20 @@ def get_immediate_conversational_context() -> list[str]:
             with pool.connection() as conn:
                 register_vector(conn)
                 with conn.cursor() as cur:
-                    time_threshold = datetime.now() - timedelta(minutes=CONTEXT_TIME_WINDOW_MINUTES)
+                    time_threshold = datetime.now(timezone.utc) - timedelta(minutes=CONTEXT_TIME_WINDOW_MINUTES)
                     cur.execute(
                         "SELECT id, sender, content, timestamp FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC",
                         (time_threshold,),
                     )
-                    current_time = datetime.now()
+                    current_time = datetime.now(timezone.utc)
                     messages = [
-                        (row[0], row[1], row[2], row[3], int((current_time - row[3]).total_seconds() / 60))
+                        (
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3],
+                            int((current_time - row[3].replace(tzinfo=timezone.utc)).total_seconds() / 60),
+                        )
                         for row in cur.fetchall()
                     ]
         except Exception as e:
@@ -136,9 +142,15 @@ def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
                         "SELECT id, sender, content, timestamp FROM messages ORDER BY embedding <-> %s LIMIT %s",
                         (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
                     )
-                    current_time = datetime.now()
+                    current_time = datetime.now(timezone.utc)
                     messages = [
-                        (row[0], row[1], row[2], row[3], int((current_time - row[3]).total_seconds() / 60))
+                        (
+                            row[0],
+                            row[1],
+                            row[2],
+                            row[3],
+                            int((current_time - row[3].replace(tzinfo=timezone.utc)).total_seconds() / 60),
+                        )
                         for row in cur.fetchall()
                     ]
         except Exception as e:
