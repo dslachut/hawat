@@ -84,9 +84,13 @@ def get_immediate_conversational_context() -> list[str]:
             with conn.cursor() as cur:
                 time_threshold = datetime.now() - timedelta(minutes=CONTEXT_TIME_WINDOW_MINUTES)
                 cur.execute(
-                    "SELECT content FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC", (time_threshold,)
+                    "SELECT sender, content, timestamp FROM messages WHERE timestamp >= %s ORDER BY timestamp ASC",
+                    (time_threshold,),
                 )
-                messages = [row[0] for row in cur.fetchall()]
+                current_time = datetime.now()
+                messages = [
+                    (row[0], row[1], int((current_time - row[2]).total_seconds() / 60)) for row in cur.fetchall()
+                ]
     except Exception as e:
         print(f"Error retrieving conversational context: {e}")
     finally:
@@ -108,10 +112,13 @@ def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
             query_embedding = get_embedding(query_string)
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT content FROM messages ORDER BY embedding <-> %s LIMIT %s",
+                    "SELECT sender, content, timestamp FROM messages ORDER BY embedding <-> %s LIMIT %s",
                     (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
                 )
-                messages = [row[0] for row in cur.fetchall()]
+                current_time = datetime.now()
+                messages = [
+                    (row[0], row[1], int((current_time - row[2]).total_seconds() / 60)) for row in cur.fetchall()
+                ]
     except Exception as e:
         print(f"Error retrieving relevant messages by vector similarity: {e}")
     finally:
