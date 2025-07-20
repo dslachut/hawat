@@ -29,21 +29,34 @@ def _get_connection_pool():
             )
             # Ensure the `vector` extension and `messages` table exist when the pool is first created
             with _connection_pool.connection() as conn:
-                _create_messages_table(conn)
+                _create_tables(conn)
         except Exception as e:
             print(f"Error initializing connection pool or creating tables: {e}")
             _connection_pool = None  # Reset pool if initialization fails
     return _connection_pool
 
 
-def _create_messages_table(conn):
-    """Creates the messages table if it doesn\'t exist."""
-    # This function should only be called once during connection pool initialization
-    """Creates the messages table if it doesn\'t exist."""
+def _create_tables(conn):
+    """Creates tables that must exist for system function"""
+    _create_vector_extension(conn)
+    _create_messages_table(conn)
+
+
+def _create_vector_extension(conn):
+    """Initialize the pgvector extension in the database"""
     try:
         with conn.cursor() as cur:
             cur.execute("""CREATE EXTENSION IF NOT EXISTS vector;""")
             conn.commit()
+    except Exception as e:
+        print(f"Error initializing pgvector: {e}")
+
+
+def _create_messages_table(conn):
+    """Creates the messages table if it doesn't exist."""
+    # This function should only be called once during connection pool initialization
+    try:
+        with conn.cursor() as cur:
             cur.execute(
                 """
                 CREATE TABLE IF NOT EXISTS messages (
