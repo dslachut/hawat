@@ -83,7 +83,8 @@ def _create_conversations_table(conn):
                 """
                 CREATE TABLE IF NOT EXISTS conversations (
                     id SERIAL PRIMARY KEY,
-                    summary TEXT
+                    summary TEXT,
+                    embedding VECTOR(384)
                 );
             """
             )
