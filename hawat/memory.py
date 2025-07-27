@@ -88,6 +88,7 @@ def _create_conversations_table(conn):
                     summary TEXT,
                     embedding VECTOR(384)
                 );
+                CREATE INDEX IF NOT EXISTS conversations_embedding_idx ON conversations USING HNSW (embedding vector_cosine_ops);
             """
             )
         conn.commit()
@@ -106,6 +107,8 @@ def _create_conversations_messages_table(conn):
                     message_id INTEGER NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
                     PRIMARY KEY (conversation_id, message_id)
                 );
+                CREATE INDEX IF NOT EXISTS conversations_messages_conversation_id_idx ON conversations_messages (conversation_id);
+                CREATE INDEX IF NOT EXISTS conversations_messages_message_id_idx ON conversations_messages (message_id);
             """
             )
         conn.commit()
