@@ -43,7 +43,22 @@ def get_immediate_conversational_context() -> list[str]:
 
 def get_related_conversations_by_vector_similarity(query_string: str) -> list[str]:
     """Retrieves conversations most relevant to the query string using vector similarity"""
-    return []
+    pool = get_connection_pool()
+    conversations = []
+    if pool:
+        try:
+            with pool.connection() as conn:
+                register_vector(conn)
+                query_embedding = get_embedding(query_string)
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT id, summary FROM conversations ORDER BY embedding <-> %s LIMIT %s",
+                        (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
+                    )
+                    conversations = [f"Conversation ID: {row[0]}, Summary: {row[1]}" for row in cur.fetchall()]
+        except Exception as e:
+            print(f"Error retrieving related conversations by vector similarity: {e}")
+    return conversations
 
 
 def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
