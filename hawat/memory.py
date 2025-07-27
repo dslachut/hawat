@@ -15,6 +15,8 @@ DB_PASSWORD = os.getenv("DB_PASSWORD", "123456abcdef")
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5431")
 
+TEN_MINUTE_DELTA = timedelta(minutes=10)
+
 # Global connection pool
 _connection_pool = None
 
@@ -131,7 +133,11 @@ def _most_recent_message()->datetime:
     except Exception as e:
         print(f"Error retrieving most recent message timestamp: {e}")
         return None
-    
+
+
+def _most_recent_conversation_id()->int:
+    """Retrieves the greatest ID value from the conversations table in the PostgreSQL database"""
+
 
 def _current_conversation_id()->int:
     """Retrieves the ID of the current conversation from the database
@@ -142,7 +148,12 @@ def _current_conversation_id()->int:
     Returns:
         int: id of the current conversation
     """
-
+    current_time = datetime.now(timezone.utc)
+    most_recent_message = _most_recent_message().replace(tzinfo=timezone.utc)
+    if (current_time - most_recent_message) < TEN_MINUTE_DELTA:
+        return _most_recent_conversation_id()
+    return _most_recent_conversation_id()
+    
 
 def record_message(message: str, sender: str = "user"):
     """Records a user message to the PostgreSQL database."""
