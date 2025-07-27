@@ -68,6 +68,8 @@ def _create_messages_table(conn):
                     embedding VECTOR(384),
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
+                CREATE INDEX IF NOT EXISTS messages_timestamp_idx ON messages (timestamp);
+                CREATE INDEX IF NOT EXISTS messages_embedding_idx ON messages USING HNSW (embedding vector_cosine_ops);
             """
             )
         conn.commit()
