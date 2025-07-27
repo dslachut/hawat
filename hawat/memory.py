@@ -136,6 +136,36 @@ def _most_recent_message()->datetime:
 
 def _most_recent_conversation_id()->int:
     """Retrieves the greatest ID value from the conversations table in the PostgreSQL database"""
+    try:
+        pool = get_connection_pool()
+        if pool:
+            with pool.connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT id FROM conversations ORDER BY id DESC LIMIT 1")
+                    result = cur.fetchone()
+                    if result:
+                        return result[0]
+        return None  # Return None if no conversation found or error
+    except Exception as e:
+        print(f"Error retrieving most recent conversation id: {e}")
+        return None
+
+
+def _record_new_conversation():
+    pool = get_connection_pool()
+    if pool:
+        try:
+            with pool.connection() as conn:
+                register_vector(conn)
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """INSERT INTO conversations (summary, embedding) VALUES (%s, %s)""",
+                        (None, None,),
+                    )
+                conn.commit()
+                print(f"Successfully created new conversation")
+        except Exception as e:
+            print(f"Error recording message to database: {e}")
 
 
 def _current_conversation_id()->int:
@@ -148,15 +178,19 @@ def _current_conversation_id()->int:
         int: id of the current conversation
     """
     current_time = datetime.now(timezone.utc)
-    most_recent_message = _most_recent_message().replace(tzinfo=timezone.utc)
-    if (current_time - most_recent_message) < TEN_MINUTE_DELTA:
-        return _most_recent_conversation_id()
+    most_recent_message = _most_recent_message()
+    if most_recent_message and ((current_time - most_recent_message.replace(tzinfo=timezone.utc)) < TEN_MINUTE_DELTA):
+        conversation_id = _most_recent_conversation_id()
+        if conversation_id:
+            return conversation_id
+    _record_new_conversation()
     return _most_recent_conversation_id()
     
 
 def record_message(message: str, sender: str = "user"):
     """Records a user message to the PostgreSQL database."""
-    pool = _get_connection_pool()
+    conversation_id = _current_conversation_id()
+    pool = get_connection_pool()
     if pool:
         try:
             with pool.connection() as conn:
@@ -166,6 +200,11 @@ def record_message(message: str, sender: str = "user"):
                     cur.execute(
                         """INSERT INTO messages (sender, content, embedding) VALUES (%s, %s, %s)""",
                         (sender, message, np.array(embedding)),
+                    )
+                    cur.execute("""SELECT id FROM messages ORDER BY id DESC LIMIT 1""")
+                    msg_id = cur.fetchone()[0]
+                    cur.execute("""INSERT INTO conversations_messages (conversation_id, message_id) VALUES (%s, %s)""",
+                        (conversation_id,msg_id,),
                     )
                 conn.commit()
                 print(f"Successfully recorded message with embedding: {message}")
