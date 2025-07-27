@@ -111,6 +111,7 @@ def _create_conversations_messages_table(conn):
 
 
 def _most_recent_message()->datetime:
+    """Retrieves the timestamp of the most recent message from the PostgreSQL database"""
     try:
         pool = _get_connection_pool()
         if pool:
