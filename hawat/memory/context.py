@@ -41,6 +41,11 @@ def get_immediate_conversational_context() -> list[str]:
     return messages
 
 
+def get_related_conversations_by_vector_similarity(query_string: str) -> list[str]:
+    """Retrieves conversations most relevant to the query string using vector similarity"""
+    return []
+
+
 def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
     """Retrieves messages most relevant to the query string using vector similarity."""
     pool = get_connection_pool()
