@@ -120,7 +120,7 @@ def _create_conversations_messages_table(conn):
 def _most_recent_message()->datetime:
     """Retrieves the timestamp of the most recent message from the PostgreSQL database"""
     try:
-        pool = _get_connection_pool()
+        pool = get_connection_pool()
         if pool:
             with pool.connection() as conn:
                 with conn.cursor() as cur:
@@ -178,7 +178,7 @@ CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))
 
 def get_immediate_conversational_context() -> list[str]:
     """Retrieves the most recent conversational context from the database within a specified time window."""
-    pool = _get_connection_pool()
+    pool = get_connection_pool()
     messages = []
     if pool:
         try:
@@ -211,7 +211,7 @@ TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
 
 def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
     """Retrieves messages most relevant to the query string using vector similarity."""
-    pool = _get_connection_pool()
+    pool = get_connection_pool()
     messages = []
     if pool:
         try:
