@@ -20,7 +20,7 @@ TEN_MINUTE_DELTA = timedelta(minutes=10)
 _connection_pool = None
 
 
-def _get_connection_pool():
+def get_connection_pool():
     """Initializes and returns a global connection pool."""
     global _connection_pool
     if _connection_pool is None:
