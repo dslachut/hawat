@@ -2,7 +2,6 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
-import psycopg
 from pgvector.psycopg import register_vector
 from psycopg_pool import ConnectionPool
 
