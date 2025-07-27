@@ -131,6 +131,18 @@ def _most_recent_message()->datetime:
     except Exception as e:
         print(f"Error retrieving most recent message timestamp: {e}")
         return None
+    
+
+def _current_conversation_id()->int:
+    """Retrieves the ID of the current conversation from the database
+
+    A conversation is current if the most recent message associated with that conversation is less than 10 minutes old.
+    If no conversation is current then a new conversation should be created and its ID returned.
+
+    Returns:
+        int: id of the current conversation
+    """
+
 
 def record_message(message: str, sender: str = "user"):
     """Records a user message to the PostgreSQL database."""
