@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta, timezone
+
 from pgvector.psycopg import register_vector
 
 from hawat.memory.schema import get_connection_pool
 
 TEN_MINUTE_DELTA = timedelta(minutes=10)
 
-def _most_recent_message()->datetime:
+
+def _most_recent_message() -> datetime:
     """Retrieves the timestamp of the most recent message from the PostgreSQL database"""
     try:
         pool = get_connection_pool()
@@ -22,7 +24,7 @@ def _most_recent_message()->datetime:
         return None
 
 
-def _most_recent_conversation_id()->int:
+def _most_recent_conversation_id() -> int:
     """Retrieves the greatest ID value from the conversations table in the PostgreSQL database"""
     try:
         pool = get_connection_pool()
@@ -48,7 +50,10 @@ def _record_new_conversation():
                 with conn.cursor() as cur:
                     cur.execute(
                         """INSERT INTO conversations (summary, embedding) VALUES (%s, %s)""",
-                        (None, None,),
+                        (
+                            None,
+                            None,
+                        ),
                     )
                 conn.commit()
                 print(f"Successfully created new conversation")
@@ -56,7 +61,7 @@ def _record_new_conversation():
             print(f"Error recording message to database: {e}")
 
 
-def get_current_conversation_id()->int:
+def get_current_conversation_id() -> int:
     """Retrieves the ID of the current conversation from the database
 
     A conversation is current if the most recent message associated with that conversation is less than 10 minutes old.

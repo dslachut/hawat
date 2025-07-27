@@ -1,6 +1,7 @@
 import os
-from psycopg_pool import ConnectionPool
+
 from pgvector.psycopg import register_vector
+from psycopg_pool import ConnectionPool
 
 # Database connection details - TODO: Make this configurable (e.g., environment variables)
 DB_NAME = os.getenv("DB_NAME", "hawat")

@@ -22,12 +22,14 @@ def record_message(message: str, sender: str = "user"):
                     )
                     cur.execute("""SELECT id FROM messages ORDER BY id DESC LIMIT 1""")
                     msg_id = cur.fetchone()[0]
-                    cur.execute("""INSERT INTO conversations_messages (conversation_id, message_id) VALUES (%s, %s)""",
-                        (conversation_id,msg_id,),
+                    cur.execute(
+                        """INSERT INTO conversations_messages (conversation_id, message_id) VALUES (%s, %s)""",
+                        (
+                            conversation_id,
+                            msg_id,
+                        ),
                     )
                 conn.commit()
                 print(f"Successfully recorded message with embedding: {message}")
         except Exception as e:
             print(f"Error recording message to database: {e}")
-
-
