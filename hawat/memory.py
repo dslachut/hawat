@@ -40,6 +40,8 @@ def _create_tables(conn):
     """Creates tables that must exist for system function"""
     _create_vector_extension(conn)
     _create_messages_table(conn)
+    _create_conversations_table(conn)
+    _create_conversations_messages_table(conn)
 
 
 def _create_vector_extension(conn):
@@ -72,6 +74,56 @@ def _create_messages_table(conn):
     except Exception as e:
         print(f"Error creating messages table: {e}")
 
+
+def _create_conversations_table(conn):
+    """Creates the conversations table if it doesn't exist"""
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS conversations (
+                    id SERIAL PRIMARY KEY,
+                    summary TEXT
+                );
+            """
+            )
+        conn.commit()
+    except Exception as e:
+        print(f"Error creating conversations table: {e}")
+
+
+def _create_conversations_messages_table(conn):
+    """Creates the conversations_messages table if it doesn't exist"""
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS conversations_messages (
+                    conversation_id INTEGER NOT NULL REFERENCES conversations (id) ON DELETE CASCADE,
+                    message_id INTEGER NOT NULL REFERENCES messages (id) ON DELETE CASCADE,
+                    PRIMARY KEY (conversation_id, message_id)
+                );
+            """
+            )
+        conn.commit()
+    except Exception as e:
+        print(f"Error creating conversations_messages table: {e}")
+
+
+def _most_recent_message()->datetime:
+    try:
+        pool = _get_connection_pool()
+        if pool:
+            with pool.connection() as conn:
+                with conn.cursor() as cur:
+                    cur.execute("SELECT timestamp FROM messages ORDER BY id DESC LIMIT 1")
+                    result = cur.fetchone()
+                    if result:
+                        return result[0]
+        return None  # Return None if no message found or error
+    except Exception as e:
+        print(f"Error retrieving most recent message timestamp: {e}")
+        return None
 
 def record_message(message: str, sender: str = "user"):
     """Records a user message to the PostgreSQL database."""
