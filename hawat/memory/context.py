@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from pgvector.psycopg import register_vector
+from arrow import Arrow
 
 from hawat.embeddings import get_embedding
 
@@ -11,17 +12,17 @@ from hawat.memory.schema import get_connection_pool
 CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))  # Default to last 5 minutes
 TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
 
-CONVO_CONTEXT_TEMPLATE = """Related Prior Conversations
+CONVO_CONTEXT_TEMPLATE = """Summaries of some prior conversations related to the current topic
 ---
 {convos}
 
 
-Related Prior Messages
+Individual messages from other conversations that may be related to the current discussion
 ---
 {messages}
 
 
-Current Conversation
+The current conversation starts here
 ---
 {current}
 """
@@ -30,7 +31,7 @@ NONE_AVAILABLE = ["None available"]
 def _format_context_messages(messages: list[tuple[int, str, str, datetime, int]])->list[str]:
     # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
     return [
-        f"{message_tuple[1]} ({message_tuple[4]} minutes ago): {message_tuple[2]}" for message_tuple in messages
+        f"- {message_tuple[1]} ({Arrow.fromdatetime(message_tuple[3]).humanize()}): {message_tuple[2]}" for message_tuple in messages
     ]
 
 
@@ -42,7 +43,7 @@ def get_formatted_context(message):
     # Remove "relevant messages" that are already in conversational context
     to_remove = {m[0] for m in conversational_context}.intersection({m[0] for m in relevant_messages})
     ready_relevant_messages = _format_context_messages(sorted([m for m in relevant_messages if m[0] not in to_remove], key=lambda m: m[3])) or NONE_AVAILABLE
-    ready_conversational_context = _format_context_messages(conversational_context) or NONE_AVAILABLE
+    ready_conversational_context = _format_context_messages(conversational_context)
 
     # Format the deduplicated and sorted messages.
     context = CONVO_CONTEXT_TEMPLATE.format(

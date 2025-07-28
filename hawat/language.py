@@ -5,7 +5,7 @@ CONVERSATION_SYSTEM_PROMPT_TEMPLATE = """You are Hawat, a helpful, conversationa
 CONVERSATION_USER_PROMPT_TEMPLATE = """The following is a conversation with the user, followed by their most recent message.
 
 {context}
-User: {user_message}"""
+User (Just now): {user_message}"""
 
 SUMMARY_SYSTEM_PROMPT_TEMPLATE = """The following is a chat conversation between a human, User, and a conversational AI, Hawat. Summarize the conversation."""
 

@@ -4,7 +4,7 @@ from pgvector.psycopg import register_vector
 
 from hawat.memory.schema import get_connection_pool
 
-TEN_MINUTE_DELTA = timedelta(minutes=10)
+CONVO_THRESHOLD = timedelta(minutes=30)
 
 
 def _most_recent_message() -> datetime:
@@ -64,7 +64,7 @@ def _record_new_conversation():
 def get_current_conversation_id() -> int:
     """Retrieves the ID of the current conversation from the database
 
-    A conversation is current if the most recent message associated with that conversation is less than 10 minutes old.
+    A conversation is current if the most recent message associated with that conversation is less than CONVO_THRESHOLD minutes old.
     If no conversation is current then a new conversation should be created and its ID returned.
 
     Returns:
@@ -72,7 +72,7 @@ def get_current_conversation_id() -> int:
     """
     current_time = datetime.now(timezone.utc)
     most_recent_message = _most_recent_message()
-    if most_recent_message and ((current_time - most_recent_message.replace(tzinfo=timezone.utc)) < TEN_MINUTE_DELTA):
+    if most_recent_message and ((current_time - most_recent_message.replace(tzinfo=timezone.utc)) < CONVO_THRESHOLD):
         conversation_id = _most_recent_conversation_id()
         if conversation_id:
             return conversation_id
