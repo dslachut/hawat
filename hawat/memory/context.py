@@ -31,7 +31,7 @@ def get_formatted_context(message):
     return context
 
 
-def get_immediate_conversational_context() -> list[str]:
+def get_immediate_conversational_context() -> list[tuple[int, str, str, datetime, int]]:
     """Retrieves the most recent conversational context from the database within a specified time window."""
     pool = get_connection_pool()
     messages = []
@@ -81,7 +81,7 @@ def get_related_conversations_by_vector_similarity(query_string: str) -> list[st
     return conversations
 
 
-def get_relevant_messages_by_vector_similarity(query_string: str) -> list[str]:
+def get_relevant_messages_by_vector_similarity(query_string: str) -> list[tuple[int, str, str, datetime, int]]:
     """Retrieves messages most relevant to the query string using vector similarity."""
     pool = get_connection_pool()
     messages = []
