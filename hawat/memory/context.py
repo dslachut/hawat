@@ -5,10 +5,30 @@ import numpy as np
 from pgvector.psycopg import register_vector
 
 from hawat.embeddings import get_embedding
+
 from hawat.memory.schema import get_connection_pool
 
 CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))  # Default to last 5 minutes
 TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
+
+def get_formatted_context(message):
+    conversational_context = get_immediate_conversational_context()
+    relevant_messages = get_relevant_messages_by_vector_similarity(message)
+
+    # Combine and deduplicate messages based on their unique ID (m[0])
+    combined_messages = {m[0]: m for m in conversational_context + relevant_messages}.values()
+
+    # Sort messages by their original timestamp (m[3]) to ensure chronological order in the context
+    sorted_messages = sorted(combined_messages, key=lambda m: m[3])  # Use original timestamp for sorting
+
+    # Format the deduplicated and sorted messages.
+    # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
+    formatted_context_messages = [
+        f"{message_tuple[1]} ({message_tuple[4]} minutes ago): {message_tuple[2]}" for message_tuple in sorted_messages
+    ]
+
+    context = "\n".join(formatted_context_messages)
+    return context
 
 
 def get_immediate_conversational_context() -> list[str]:
