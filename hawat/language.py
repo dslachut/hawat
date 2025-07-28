@@ -38,7 +38,7 @@ def get_conversation_response(user_message: str, context: str = "") -> str:
         str: The completed chat response.
     """
     response = _client.chat.completions.create(
-        _model,
+        model=_model,
         messages=[
             {"role": "system", "content": CONVERSATION_SYSTEM_PROMPT_TEMPLATE},
             {"role": "user", "content": CONVERSATION_USER_PROMPT_TEMPLATE.format(context=context, user_message=user_message)},
@@ -50,7 +50,7 @@ def get_conversation_response(user_message: str, context: str = "") -> str:
 def get_conversation_summary(formatted_convo: str) -> str:
     """Gets a summary of the conversation between User and Hawat"""
     response = _client.chat.completions.create(
-        _model,
+        model=_model,
         messages=[
             {"role": "system", "content": SUMMARY_SYSTEM_PROMPT_TEMPLATE},
             {"role": "user", "content": formatted_convo},
@@ -62,7 +62,7 @@ def get_conversation_summary(formatted_convo: str) -> str:
 def get_conversation_keys_names_subjects(formatted_convo: str) -> dict[str, list[str]] | None:
     """Gets subjects, named entities, and keywords from a conversation"""
     response = _client.chat.completions.create(
-        _model,
+        model=_model,
         messages=[
             {"role": "system", "content": NER_SYSTEM_PROMPT_TEMPLATE},
             {"role": "user", "content": formatted_convo},
