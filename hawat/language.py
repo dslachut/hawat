@@ -25,6 +25,7 @@ _client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
 )
 _model=os.getenv("OPENAI_CHAT_MODEL", "deepseek/deepseek-r1-0528:free")  # Default chat model
+print(f"Using model: {_model}")
 
 def get_conversation_response(user_message: str, context: str = "") -> str:
     """
