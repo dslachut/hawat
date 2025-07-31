@@ -28,7 +28,7 @@ The current conversation starts here
 """
 NONE_AVAILABLE = ["None available"]
 
-def _format_context_messages(messages: list[tuple[int, str, str, datetime, int]])->list[str]:
+def format_context_messages(messages: list[tuple[int, str, str, datetime, int]])->list[str]:
     # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
     return [
         f"- {message_tuple[1]} ({Arrow.fromdatetime(message_tuple[3]).humanize()}): {message_tuple[2]}" for message_tuple in messages
