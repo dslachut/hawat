@@ -19,25 +19,27 @@ Plan Outline
         - [x] Store outgoing messages
         - [x] Store incoming messages
     - Process Messages
-        - Summarize conversations
-        - Summarize statements
-        - Develop important facts
-        - Named-Entity and Keyword recognition
-        - Conversation and statement times
-        - Recognize Conversation changes
+        - [x] Summarize conversations
+        - [ ] Summarize statements
+        - [ ] Develop important facts
+        - [ ] Named-Entity and Keyword recognition
+        - [x] Conversation and statement times
+        - [ ] Recognize Conversation changes
     - Manage multiple resolutions of memory within and between conversations
     - Use convos and metadata to explore connections between concepts
-    - "Reflection" between convos to do the summarizations and connections
+    - [ ] "Reflection" between convos to do the summarizations and connections
     - Trigger new conversations at relevant points
-- Interchangeable, self-hosted LLM service via OpenAI API
+- [ ] Interchangeable, self-hosted LLM service via OpenAI API
+    - [ ] Interchangeable LLM service via OpenAI API
     - Grab something 'abliterated' from Hugging Face
     - Probably run it with LM Studio
-- Self-hosted embeddings model
-    - Need to pick one and stick with it
-    - Design DB to support migrating embedding generator
-- Interchangeable, self-hosted vector DB
-    - Honestly? Just Postgres
-- Extensions
+- [x] Self-hosted embeddings model
+    - ~~Need to pick one and stick with it~~
+    - [ ] Design DB to support migrating embedding generator
+        - Nothing to this one with just need a script to recalculate all vector embeddings
+- ~~Interchangeable, self-hosted vector DB~~
+    - [x] Honestly? Just Postgres
+- Extensions (some day)
     - TTS
     - STT
     - Tools
