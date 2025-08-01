@@ -1,6 +1,8 @@
 from sys import stderr
 
 import grpc
+from rich.console import Console
+from rich.markdown import Markdown
 
 import hawat.proto.chat_pb2 as pb2
 import hawat.proto.chat_pb2_grpc as pb2_grpc
@@ -14,12 +16,15 @@ def main() -> None:
     channel = grpc.insecure_channel("localhost:50051")
     stub = pb2_grpc.HawatChatStub(channel)
     print(_START_MSG)
+    console = Console()
     try:
         while True:
             client_msg = input("> ")
             client_chat = pb2.ClientChat(message=client_msg)  # pylint: disable=no-member
             server_chat = stub.send_chat(client_chat)
-            print(">>", server_chat.message)
+            #print(">>", server_chat.message)
+            print(">> ", end='')
+            console.print(Markdown(server_chat.message))
     except KeyboardInterrupt:
         print(_CLOSE_MSG)
     except Exception as e:
