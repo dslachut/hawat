@@ -2,30 +2,38 @@ import os
 from datetime import datetime, timedelta, timezone
 
 import numpy as np
+from arrow import Arrow
 from pgvector.psycopg import register_vector
 
 from hawat.embeddings import get_embedding
 from hawat.memory.schema import get_connection_pool
-from hawat.memory.messages import format_message_log
 
 CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))  # Default to last 5 minutes
 TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
 
 CONVO_CONTEXT_TEMPLATE = """Summaries of some prior conversations related to the current topic
----
+===
 {convos}
 
 
 Individual messages from other conversations that may be related to the current discussion
----
+===
 {messages}
 
 
 The current conversation starts here
----
+===
 {current}
 """
 NONE_AVAILABLE = ["None available"]
+
+
+def format_message_log(messages: list[tuple[int, str, str, datetime, int]]) -> list[str]:
+    # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
+    return [
+        f"{message_tuple[1]} [{Arrow.fromdatetime(message_tuple[3]).humanize()}]:\n{message_tuple[2]}"
+        for message_tuple in messages
+    ]
 
 
 def get_formatted_context(message):
@@ -40,12 +48,13 @@ def get_formatted_context(message):
         or NONE_AVAILABLE
     )
     ready_conversational_context = format_message_log(conversational_context)
+    ready_conversational_context = ready_conversational_context or ["Starting a new conversation."]
 
     # Format the deduplicated and sorted messages.
     context = CONVO_CONTEXT_TEMPLATE.format(
-        convos="\n".join(related_convos),
-        messages="\n".join(ready_relevant_messages),
-        current="\n".join(ready_conversational_context),
+        convos="\n---\n".join(related_convos),
+        messages="\n---\n".join(ready_relevant_messages),
+        current="\n---\n".join(ready_conversational_context),
     )
 
     return context
@@ -92,10 +101,13 @@ def get_related_conversations_by_vector_similarity(query_string: str) -> list[st
                 query_embedding = get_embedding(query_string)
                 with conn.cursor() as cur:
                     cur.execute(
-                        "SELECT id, summary FROM conversations WHERE summary IS NOT NULL ORDER BY embedding <-> %s LIMIT %s",
+                        "SELECT id, summary, timestamp FROM conversations WHERE summary IS NOT NULL ORDER BY embedding <-> %s LIMIT %s",
                         (np.array(query_embedding), TOP_K_SIMILAR_MESSAGES),
                     )
-                    conversations = [f"Conversation ID: {row[0]}, Summary: {row[1]}" for row in cur.fetchall()]
+                    conversations = [
+                        f"Conversation ID: {row[0]} [{Arrow.fromdatetime(row[2].replace(tzinfo=timezone.utc)).humanize()}]\nSummary:\n{row[1]}"
+                        for row in cur.fetchall()
+                    ]
         except Exception as e:
             print(f"Error retrieving related conversations by vector similarity: {e}")
     return conversations
