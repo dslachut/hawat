@@ -1,7 +1,11 @@
+from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
+import numpy as np
 from pgvector.psycopg import register_vector
 
+from hawat.embeddings import get_embedding
+from hawat.memory.context import format_message_log
 from hawat.memory.schema import get_connection_pool
 
 CONVO_THRESHOLD = timedelta(minutes=30)
@@ -81,14 +85,14 @@ def get_current_conversation_id() -> int:
     return _most_recent_conversation_id()
 
 
-def get_unsummarized_conversations() -> list[tuple[int, str, str, datetime, int, int]]:
+def get_unsummarized_conversations() -> tuple[dict[int, list[str]], dict[int, datetime]]:
     pool = get_connection_pool()
     messages = []
     if pool:
         try:
-            with pool.connection as conn, conn.cursor() as cur:
+            with pool.connection() as conn, conn.cursor() as cur:
                 cur.execute(
-                    """SELECT m.id, m.sender, m.content, m.timestamp, c.id AS conversation_id FROM conversations_messages AS cm INNER JOIN conversations AS c ON cm.conversation_id = c.id INNER JOIN messages AS m ON cm.message_id = m.id WHERE c.summary IS NULL OR c.summary = '' OR c.timestamp < (SELECT Max(msg.timestamp) FROM messages AS msg INNER JOIN conversations_messages AS conmsg ON msg.id=conmsg.message_id WHERE conmsg.conversation_id = c.id)"""
+                    """SELECT m.id, m.sender, m.content, m.timestamp, c.id AS conversation_id FROM conversations_messages AS cm INNER JOIN conversations AS c ON cm.conversation_id = c.id INNER JOIN messages AS m ON cm.message_id = m.id WHERE c.summary IS NULL OR c.summary = '' OR c.timestamp < (SELECT Max(msg.timestamp) FROM messages AS msg INNER JOIN conversations_messages AS conmsg ON msg.id=conmsg.message_id WHERE conmsg.conversation_id = c.id) ORDER BY m.timestamp"""
                 )
                 current_time = datetime.now(timezone.utc)
                 messages = [
@@ -103,5 +107,31 @@ def get_unsummarized_conversations() -> list[tuple[int, str, str, datetime, int,
                     for row in cur.fetchall()
                 ]
         except Exception as e:
-            print("Error getting unsummarized conversations from database: {e}")
-    return messages
+            print(f"Error getting unsummarized conversations from database: {e}")
+    conversations = defaultdict(list)
+    _ = [conversations[m[5]].append(m[:5]) for m in messages]
+    return {k: format_message_log(v) for k, v in conversations.items()}, {
+        k: v[-1][3].replace(tzinfo=timezone.utc) for k, v in conversations.items()
+    }
+
+
+def update_conversation_summary(id: int, summary: str, timestamp: datetime) -> None:
+    pool = get_connection_pool()
+    if pool:
+        try:
+            embedding = np.array(get_embedding(summary))
+            with pool.connection() as conn:
+                register_vector(conn)
+                with conn.cursor() as cur:
+                    cur.execute(
+                        """UPDATE conversations SET summary=%s, embedding=%s, timestamp=%s WHERE id=%s""",
+                        (
+                            summary,
+                            embedding,
+                            timestamp,
+                            id,
+                        ),
+                    )
+                conn.commit()
+        except Exception as e:
+            print(f"Error recording message to database: {e}")
