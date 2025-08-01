@@ -1,20 +1,9 @@
-from datetime import datetime
-
 import numpy as np
-from arrow import Arrow
 from pgvector.psycopg import register_vector
 
 from hawat.embeddings import get_embedding
 from hawat.memory.conversations import get_current_conversation_id
 from hawat.memory.schema import get_connection_pool
-
-
-def format_message_log(messages: list[tuple[int, str, str, datetime, int]]) -> list[str]:
-    # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
-    return [
-        f"- {message_tuple[1]} ({Arrow.fromdatetime(message_tuple[3]).humanize()}): {message_tuple[2]}"
-        for message_tuple in messages
-    ]
 
 
 def record_message(message: str, sender: str = "user"):
