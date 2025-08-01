@@ -1,9 +1,11 @@
 import threading
 import time
+
 import schedule
 
 # A lock to ensure only one instance of the task runs at a time
 task_lock = threading.Lock()
+
 
 def run_hourly_task():
     """
@@ -16,14 +18,16 @@ def run_hourly_task():
             print("Hourly task running at {time.time()}...")
             # Add your hourly task logic here
             # For demonstration, let"s simulate some work
-            from hawat.memory.reflection import get_unsummarized_conversations
+            from hawat.memory.conversations import get_unsummarized_conversations
+
             unsummarized_conversations = get_unsummarized_conversations()
             print(f"Found {len(unsummarized_conversations)} unsummarized conversations.")
             # Here, you would process these conversations for summarization or reflection
         finally:
-            task_lock.release() # Release the lock whether the task succeeds or fails
+            task_lock.release()  # Release the lock whether the task succeeds or fails
     else:
         print("Skipping hourly task: another instance is already running.")
+
 
 def start_reflection_thread():
     """
@@ -35,7 +39,7 @@ def start_reflection_thread():
     def run_scheduler():
         while True:
             schedule.run_pending()
-            time.sleep(1) # Check every second for pending jobs
+            time.sleep(1)  # Check every second for pending jobs
 
     # Start the scheduler in a daemon thread
     thread = threading.Thread(target=run_scheduler, daemon=True)

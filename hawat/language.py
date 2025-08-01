@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 CONVERSATION_SYSTEM_PROMPT_TEMPLATE = """You are Hawat, a helpful, conversational AI. Your purpose is to assist the user by providing effective advice and assistance."""
 CONVERSATION_USER_PROMPT_TEMPLATE = """The following is a conversation with the user, followed by their most recent message.
@@ -24,8 +24,9 @@ _client = OpenAI(
     base_url=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1"),
     api_key=os.getenv("OPENAI_API_KEY"),
 )
-_model=os.getenv("OPENAI_CHAT_MODEL", "deepseek/deepseek-r1-0528:free")  # Default chat model
+_model = os.getenv("OPENAI_CHAT_MODEL", "deepseek/deepseek-r1-0528:free")  # Default chat model
 print(f"Using model: {_model}")
+
 
 def get_conversation_response(user_message: str, context: str = "") -> str:
     """
@@ -42,7 +43,10 @@ def get_conversation_response(user_message: str, context: str = "") -> str:
         model=_model,
         messages=[
             {"role": "system", "content": CONVERSATION_SYSTEM_PROMPT_TEMPLATE},
-            {"role": "user", "content": CONVERSATION_USER_PROMPT_TEMPLATE.format(context=context, user_message=user_message)},
+            {
+                "role": "user",
+                "content": CONVERSATION_USER_PROMPT_TEMPLATE.format(context=context, user_message=user_message),
+            },
         ],
     )
     return response.choices[0].message.content
@@ -72,7 +76,11 @@ def get_conversation_keys_names_subjects(formatted_convo: str) -> dict[str, list
     content = response.choices[0].message.content
     try:
         output = json.loads(content)
-        if not (isinstance(output['entities'], list) and isinstance(output['keywords'], list) and isinstance(output['subjects'], list)):
+        if not (
+            isinstance(output["entities"], list)
+            and isinstance(output["keywords"], list)
+            and isinstance(output["subjects"], list)
+        ):
             raise TypeError
         return output
     except Exception as e:

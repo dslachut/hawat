@@ -9,32 +9,26 @@ from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import runtime_version as _runtime_version
 from google.protobuf import symbol_database as _symbol_database
 from google.protobuf.internal import builder as _builder
-_runtime_version.ValidateProtobufRuntimeVersion(
-    _runtime_version.Domain.PUBLIC,
-    6,
-    31,
-    0,
-    '',
-    'hawat/proto/chat.proto'
-)
+
+_runtime_version.ValidateProtobufRuntimeVersion(_runtime_version.Domain.PUBLIC, 6, 31, 0, "", "hawat/proto/chat.proto")
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
 
 
-
-
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16hawat/proto/chat.proto\"\x1d\n\nClientChat\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1d\n\nServerChat\x12\x0f\n\x07message\x18\x01 \x01(\t24\n\tHawatChat\x12\'\n\tsend_chat\x12\x0b.ClientChat\x1a\x0b.ServerChat\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(
+    b'\n\x16hawat/proto/chat.proto"\x1d\n\nClientChat\x12\x0f\n\x07message\x18\x01 \x01(\t"\x1d\n\nServerChat\x12\x0f\n\x07message\x18\x01 \x01(\t24\n\tHawatChat\x12\'\n\tsend_chat\x12\x0b.ClientChat\x1a\x0b.ServerChat"\x00\x62\x06proto3'
+)
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
-_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'hawat.proto.chat_pb2', _globals)
+_builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, "hawat.proto.chat_pb2", _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
-  DESCRIPTOR._loaded_options = None
-  _globals['_CLIENTCHAT']._serialized_start=26
-  _globals['_CLIENTCHAT']._serialized_end=55
-  _globals['_SERVERCHAT']._serialized_start=57
-  _globals['_SERVERCHAT']._serialized_end=86
-  _globals['_HAWATCHAT']._serialized_start=88
-  _globals['_HAWATCHAT']._serialized_end=140
+    DESCRIPTOR._loaded_options = None
+    _globals["_CLIENTCHAT"]._serialized_start = 26
+    _globals["_CLIENTCHAT"]._serialized_end = 55
+    _globals["_SERVERCHAT"]._serialized_start = 57
+    _globals["_SERVERCHAT"]._serialized_end = 86
+    _globals["_HAWATCHAT"]._serialized_start = 88
+    _globals["_HAWATCHAT"]._serialized_end = 140
 # @@protoc_insertion_point(module_scope)
