@@ -81,7 +81,8 @@ def _create_conversations_table(conn):
                 CREATE TABLE IF NOT EXISTS conversations (
                     id SERIAL PRIMARY KEY,
                     summary TEXT,
-                    embedding VECTOR(384)
+                    embedding VECTOR(384),
+                    timestamp TIMESTAMP
                 );
                 CREATE INDEX IF NOT EXISTS conversations_embedding_idx ON conversations USING HNSW (embedding vector_cosine_ops);
             """
