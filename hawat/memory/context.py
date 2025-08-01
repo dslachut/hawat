@@ -3,11 +3,10 @@ from datetime import datetime, timedelta, timezone
 
 import numpy as np
 from pgvector.psycopg import register_vector
-from arrow import Arrow
 
 from hawat.embeddings import get_embedding
-
 from hawat.memory.schema import get_connection_pool
+from hawat.memory.messages import format_message_log
 
 CONTEXT_TIME_WINDOW_MINUTES = int(os.getenv("CONTEXT_TIME_WINDOW_MINUTES", "5"))  # Default to last 5 minutes
 TOP_K_SIMILAR_MESSAGES = int(os.getenv("TOP_K_SIMILAR_MESSAGES", "3"))
@@ -28,12 +27,6 @@ The current conversation starts here
 """
 NONE_AVAILABLE = ["None available"]
 
-def format_context_messages(messages: list[tuple[int, str, str, datetime, int]])->list[str]:
-    # message_tuple[1] is the sender, message_tuple[4] is minutes ago, message_tuple[2] is the content
-    return [
-        f"- {message_tuple[1]} ({Arrow.fromdatetime(message_tuple[3]).humanize()}): {message_tuple[2]}" for message_tuple in messages
-    ]
-
 
 def get_formatted_context(message):
     conversational_context = get_immediate_conversational_context()
@@ -42,15 +35,18 @@ def get_formatted_context(message):
 
     # Remove "relevant messages" that are already in conversational context
     to_remove = {m[0] for m in conversational_context}.intersection({m[0] for m in relevant_messages})
-    ready_relevant_messages = _format_context_messages(sorted([m for m in relevant_messages if m[0] not in to_remove], key=lambda m: m[3])) or NONE_AVAILABLE
-    ready_conversational_context = _format_context_messages(conversational_context)
+    ready_relevant_messages = (
+        format_message_log(sorted([m for m in relevant_messages if m[0] not in to_remove], key=lambda m: m[3]))
+        or NONE_AVAILABLE
+    )
+    ready_conversational_context = format_message_log(conversational_context)
 
     # Format the deduplicated and sorted messages.
     context = CONVO_CONTEXT_TEMPLATE.format(
         convos="\n".join(related_convos),
         messages="\n".join(ready_relevant_messages),
-        current = "\n".join(ready_conversational_context),
-        )
+        current="\n".join(ready_conversational_context),
+    )
 
     return context
 

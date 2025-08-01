@@ -49,8 +49,9 @@ def _record_new_conversation():
                 register_vector(conn)
                 with conn.cursor() as cur:
                     cur.execute(
-                        """INSERT INTO conversations (summary, embedding) VALUES (%s, %s)""",
+                        """INSERT INTO conversations (summary, embedding, timestamp) VALUES (%s, %s, %s)""",
                         (
+                            None,
                             None,
                             None,
                         ),
@@ -78,3 +79,29 @@ def get_current_conversation_id() -> int:
             return conversation_id
     _record_new_conversation()
     return _most_recent_conversation_id()
+
+
+def get_unsummarized_conversations() -> list[tuple[int, str, str, datetime, int, int]]:
+    pool = get_connection_pool()
+    messages = []
+    if pool:
+        try:
+            with pool.connection as conn, conn.cursor() as cur:
+                cur.execute(
+                    """SELECT m.id, m.sender, m.content, m.timestamp, c.id AS conversation_id FROM conversations_messages AS cm INNER JOIN conversations AS c ON cm.conversation_id = c.id INNER JOIN messages AS m ON cm.message_id = m.id WHERE c.summary IS NULL OR c.summary = '' OR c.timestamp < (SELECT Max(msg.timestamp) FROM messages AS msg INNER JOIN conversations_messages AS conmsg ON msg.id=conmsg.message_id WHERE conmsg.conversation_id = c.id)"""
+                )
+                current_time = datetime.now(timezone.utc)
+                messages = [
+                    (
+                        row[0],
+                        row[1],
+                        row[2],
+                        row[3],
+                        int((current_time - row[3].replace(tzinfo=timezone.utc)).total_seconds() / 60),
+                        row[4],
+                    )
+                    for row in cur.fetchall()
+                ]
+        except Exception as e:
+            print("Error getting unsummarized conversations from database: {e}")
+    return messages
