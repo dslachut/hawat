@@ -4,6 +4,10 @@ Hawat
 - Conversational agent with long and short-term memory, run only on personal infrastructure, to provide effective advice and assistance to the user.
 - A conversation partner that remembers previous conversations.
 
+How to run
+---
+Coming eventually
+
 Plan Outline
 ---
 - Python CLI FE (initial)
@@ -15,7 +19,7 @@ Plan Outline
         - [x] Pass responses back to FE
         - [ ] Make it async
         - [ ] Use a stream?
-    - [ ] Store conversations
+    - [x] Store conversations
         - [x] Store outgoing messages
         - [x] Store incoming messages
     - Process Messages
